@@ -10,20 +10,17 @@ namespace Phani.ExceptionHandler.Api
         public static IApplicationBuilder UseApiExceptionHandler(this IApplicationBuilder app)
         {
             //We can log the errors here
-            app.UseExceptionHandler(errorApp =>
+            app.UseExceptionHandler(error =>
             {
-                errorApp.Run(async context =>
+                error.Run(async context =>
                 {
-                    var errorFeature = context.Features.Get<IExceptionHandlerFeature>();
-                    var exception = errorFeature.Error;
+                    var feature = context.Features.Get<IExceptionHandlerFeature>();
+                    var httpException = (HttpException)feature.Error;
 
                     var errorResponse = new ErrorResponse();
-
-                    if (exception is HttpException httpException)
-                    {
-                        errorResponse.StatusCode = httpException.StatusCode;
-                        errorResponse.Message = httpException.Message;
-                    }
+                   
+                    errorResponse.StatusCode = httpException.StatusCode;
+                    errorResponse.Message = httpException.Message;
 
                     context.Response.StatusCode = (int)errorResponse.StatusCode;
                     context.Response.ContentType = "application/json";
